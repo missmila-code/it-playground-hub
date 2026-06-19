@@ -463,6 +463,18 @@ h2 {
   background: var(--teal);
 }
 
+.class-card.live.green {
+  --card-accent: #22c55e;
+  border-color: rgba(34, 197, 94, 0.28);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.17), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #ecfdf3 100%);
+}
+
+.class-card.live.green .class-number {
+  background: #22c55e;
+}
+
 .class-card.muted .class-number {
   background: #98a2b3;
 }
@@ -515,6 +527,12 @@ h2 {
     linear-gradient(135deg, #123a8f 0%, #1664d9 50%, #d83f6a 100%);
 }
 
+.page-hero.grade-five {
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.38), transparent 30%),
+    linear-gradient(135deg, #14532d 0%, #22c55e 52%, #f2a31b 100%);
+}
+
 .page-hero.grade-eight {
   background:
     radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.38), transparent 30%),
@@ -552,6 +570,14 @@ h2 {
   background:
     radial-gradient(circle at 100% 0%, rgba(15, 159, 154, 0.14), transparent 34%),
     linear-gradient(180deg, #ffffff 0%, #e9fbf8 100%);
+}
+
+.activity-card.featured.green {
+  --card-accent: #22c55e;
+  border-color: rgba(34, 197, 94, 0.26);
+  background:
+    radial-gradient(circle at 100% 0%, rgba(34, 197, 94, 0.14), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, #ecfdf3 100%);
 }
 
 .activity-card:not(.featured),
