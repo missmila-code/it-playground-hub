@@ -1,0 +1,607 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Анатомия на графиката | IT Playground Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .page-hero.grade-nine {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.36), transparent 30%),
+        linear-gradient(135deg, #0f3f99 0%, #1664d9 50%, #0f9f9a 100%);
+    }
+    .type-tabs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-top: 22px; }
+    .type-tab {
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      padding: 14px 12px;
+      background: #fff;
+      font: inherit;
+      font-weight: 900;
+      color: var(--blue-dark);
+      cursor: pointer;
+      text-align: left;
+      box-shadow: 0 10px 24px rgba(18, 32, 58, 0.06);
+    }
+    .type-tab span { display: block; margin-top: 4px; color: var(--muted); font-size: 0.82rem; font-weight: 700; }
+    .type-tab[aria-selected="true"] { color: #fff; background: linear-gradient(135deg, var(--blue), var(--teal)); border-color: transparent; }
+    .type-tab[aria-selected="true"] span { color: #e0f2fe; }
+    .lab {
+      display: grid;
+      grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+      gap: 18px;
+      margin-top: 18px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      background: var(--panel);
+      box-shadow: 0 14px 35px rgba(18, 32, 58, 0.08);
+    }
+    .panel h2 { font-size: clamp(1.35rem, 2.2vw, 1.8rem); margin-bottom: 8px; }
+    .panel > p { color: #5b6678; line-height: 1.55; }
+    .when { border-radius: 14px; padding: 10px 14px; background: #ecfdf3; color: #05603a; font-weight: 700; line-height: 1.5; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0 14px; }
+    .toggle {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 9px 14px;
+      background: #fff;
+      color: var(--blue-dark);
+      font: inherit;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .toggle[aria-pressed="true"] { color: #fff; background: var(--rose); border-color: var(--rose); }
+    .toggle.hide-btn[aria-pressed="true"] { background: #475467; border-color: #475467; }
+    svg.chart { width: 100%; height: auto; display: block; font-family: Inter, "Segoe UI", Arial, sans-serif; }
+    .part { cursor: pointer; }
+    .hit { fill: transparent; stroke: transparent; stroke-width: 2.5; }
+    .part:hover .hit, .part.active .hit { fill: rgba(242, 163, 27, 0.16); stroke: var(--amber); }
+    .hidden-part { opacity: 0; pointer-events: none; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 7px 12px;
+      background: #f4f7fb;
+      color: #344054;
+      font: inherit;
+      font-size: 0.9rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    .chip.active { background: #fff1ce; border-color: var(--amber); color: #7a4d00; }
+    .explain .label { margin: 0 0 4px; color: var(--muted); font-size: 0.78rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+    .explain .value { margin: 0 0 14px; line-height: 1.55; }
+    .explain .sheets { border-radius: 14px; padding: 12px 14px; background: #eaf2ff; color: var(--blue-dark); font-weight: 700; line-height: 1.5; }
+    .trap-note { display: none; margin-top: 12px; border-radius: 14px; padding: 12px 14px; background: #fde8ee; color: #8a1538; font-weight: 700; line-height: 1.5; }
+    .trap-note.show { display: block; }
+    .steps { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; margin: 14px 0; }
+    .step-btn {
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 12px 10px;
+      background: #fff;
+      font: inherit;
+      font-weight: 900;
+      color: var(--blue-dark);
+      cursor: pointer;
+      text-align: left;
+    }
+    .step-btn span { display: block; color: var(--muted); font-size: 0.82rem; font-weight: 700; margin-top: 4px; }
+    .step-btn.active { background: linear-gradient(135deg, var(--blue), var(--violet)); color: #fff; border-color: transparent; }
+    .step-btn.active span { color: #dbeafe; }
+    .step-box { border-radius: 18px; padding: 16px 18px; background: #f4f7fb; line-height: 1.6; }
+    .step-box strong { color: var(--blue-dark); }
+    .reveal-btn { margin-top: 10px; }
+    .answer { display: none; margin-top: 10px; color: #067647; font-weight: 800; }
+    .answer.show { display: block; }
+    .quiz { display: grid; gap: 14px; margin-top: 14px; }
+    .q { border: 1px solid var(--line); border-radius: 18px; padding: 16px 18px; background: #fff; }
+    .q p { margin: 0 0 10px; font-weight: 800; line-height: 1.5; }
+    .q label { display: flex; gap: 8px; align-items: center; padding: 6px 0; cursor: pointer; }
+    .q input[type="number"] {
+      width: 120px; min-height: 40px; border: 1px solid var(--line); border-radius: 999px; padding: 0 14px; font: inherit; font-weight: 700;
+    }
+    .feedback { min-height: 22px; margin-top: 8px; font-weight: 800; }
+    .feedback.ok { color: #067647; }
+    .feedback.no { color: var(--rose); }
+    .score { margin-top: 14px; font-size: 1.15rem; font-weight: 900; }
+    .remember { margin-top: 22px; border-radius: 24px; padding: 22px; color: #fff; background: linear-gradient(135deg, #0f3f99, #0f9f9a); }
+    .remember h2 { color: #fff; }
+    .remember p { margin: 0 0 6px; font-size: 1.1rem; font-weight: 800; line-height: 1.6; }
+    @media (max-width: 860px) {
+      .lab { grid-template-columns: 1fr; }
+      .steps { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .type-tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">IT</span><span><strong>IT Playground Hub</strong><small>9. клас</small></span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Меню</button>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Начало</a>
+      <a href="grade-9.html">9. клас</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-hero grade-nine">
+      <p class="eyebrow">9. клас · Графики</p>
+      <h1>Анатомия на графиката</h1>
+      <p>Графиката дава отговора за 3 секунди, но само ако знаеш как да я прочетеш. Избери вид графика и кликни върху всяка нейна част, за да видиш какво е и за какво служи. Всички данни са измислени.</p>
+    </section>
+
+    <div class="type-tabs" role="tablist" id="typeTabs"></div>
+
+    <section class="lab">
+      <div class="panel">
+        <h2 id="labTitle">1. Разгледай частите</h2>
+        <p class="when" id="whenText"></p>
+        <div class="toolbar">
+          <button class="toggle hide-btn" type="button" id="hideBtn" aria-pressed="false">Скрий надписите</button>
+          <button class="toggle" type="button" id="trapBtn" aria-pressed="false">Покажи капана</button>
+        </div>
+        <svg class="chart" id="chart" viewBox="0 0 720 470" role="img"></svg>
+        <div class="chips" id="chips"></div>
+        <p class="trap-note" id="trapNote"></p>
+      </div>
+
+      <aside class="panel explain" aria-live="polite">
+        <h2 id="exTitle">Избери част</h2>
+        <p class="label">Какво е</p>
+        <p class="value" id="exWhat">Кликни върху част от графиката или върху бутон под нея.</p>
+        <p class="label">На какъв въпрос отговаря</p>
+        <p class="value" id="exQuestion">–</p>
+        <p class="label">Какво гледам</p>
+        <p class="value" id="exLook">–</p>
+        <p class="label">Къде се променя в Google Sheets</p>
+        <p class="sheets" id="exSheets">Редактор на диаграми → Персонализиране</p>
+      </aside>
+    </section>
+
+    <section class="panel" style="margin-top: 22px;">
+      <h2>2. Четене в 5 стъпки</h2>
+      <p>Четем графиката винаги в този ред. Натисни стъпка, отговори си на въпроса и чак тогава виж отговора.</p>
+      <div class="steps" id="steps"></div>
+      <div class="step-box" id="stepBox"></div>
+    </section>
+
+    <section class="panel" style="margin-top: 22px;">
+      <h2>3. Провери се</h2>
+      <p>Отговори, като гледаш графиката горе. Включвай „Капана“ само когато въпросът го казва.</p>
+      <div class="quiz" id="quiz"></div>
+      <button class="button primary" type="button" id="checkAll" style="margin-top: 14px;">Провери всички</button>
+      <p class="score" id="score"></p>
+    </section>
+
+    <section class="remember">
+      <h2>Запомни</h2>
+      <p>Първо заглавие, оси и единици, после числата.</p>
+      <p>Провери от колко започва скалата и дали стъпките по оста са равни.</p>
+      <p>Кръговата графика показва части от едно цяло – заедно те са точно 100%.</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    const NS = 'http://www.w3.org/2000/svg';
+    const svg = document.getElementById('chart');
+    const BLUE = '#1664d9', AMBER = '#f2a31b', INK = '#162033', MUTED = '#667085';
+
+    function el(tag, attrs, parent, text) {
+      const e = document.createElementNS(NS, tag);
+      for (const k in attrs) e.setAttribute(k, attrs[k]);
+      if (text !== undefined) e.textContent = text;
+      if (parent) parent.appendChild(e);
+      return e;
+    }
+    function group(key) {
+      const g = el('g', { class: 'part', 'data-part': key }, svg);
+      g.addEventListener('click', () => select(key));
+      return g;
+    }
+    function hit(g, x, y, w, h) { el('rect', { class: 'hit', x, y, width: Math.max(w, 1), height: Math.max(h, 1), rx: 8 }, g); }
+    function labelBg(g, cx, cy, text, size) {
+      const w = String(text).length * (size || 16) * 0.62 + 12;
+      el('rect', { x: cx - w / 2, y: cy - 17, width: w, height: 22, rx: 6, fill: 'rgba(255,255,255,0.88)' }, g);
+      el('text', { x: cx, y: cy, 'text-anchor': 'middle', 'font-size': size || 16, 'font-weight': 800, fill: INK }, g, text);
+    }
+    function title(text) {
+      const g = group('title');
+      hit(g, 90, 8, 540, 36);
+      el('text', { x: 360, y: 33, 'text-anchor': 'middle', 'font-size': 20, 'font-weight': 900, fill: INK }, g, text);
+    }
+    function legend(items, x) {
+      const g = group('legend');
+      hit(g, x - 14, 46, 720 - 2 * (x - 14), 28);
+      let cx = x;
+      items.forEach(it => {
+        if (it.kind === 'box') el('rect', { x: cx, y: 54, width: 16, height: 14, fill: it.color, rx: 3 }, g);
+        else el('line', { x1: cx, x2: cx + 28, y1: 61, y2: 61, stroke: it.color, 'stroke-width': 4, 'stroke-dasharray': it.dash ? '8 5' : '' }, g);
+        const t = el('text', { x: cx + (it.kind === 'box' ? 22 : 34), y: 66, 'font-size': 14, fill: '#344054' }, g, it.text);
+        cx += (it.kind === 'box' ? 22 : 34) + it.text.length * 7.6 + 26;
+      });
+    }
+
+    /* ---------- 1. Стълбовидна ---------- */
+    const columnType = {
+      tab: 'Стълбовидна', sub: 'Column chart',
+      when: 'Кога я използвам: когато сравнявам стойности между различни групи.',
+      data: [['A', 72], ['B', 45], ['C', 58], ['D', 38], ['E', 81], ['F', 52]],
+      hide: ['title', 'yTitle', 'labels', 'legend'],
+      parts: {
+        title: { name: 'Заглавие', what: 'Едно изречение най-горе, което казва какво показва графиката.', question: 'За какво е тази графика?', look: 'Чети го първо. Без заглавие не знаеш дали това са точки, проценти или пари.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → Заглавие на диаграмата' },
+        yTitle: { name: 'Име на вертикалната ос и мерна единица', what: 'Надписът до вертикалната ос: какво се мери и в какво (тук: точки).', question: 'Какво мерим и в какви единици?', look: 'Без единица числото 50 може да е точки, процент или секунди.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → заглавие на вертикалната ос' },
+        scale: { name: 'Скала', what: 'Числата по вертикалната ос и стъпката между тях (0, 20, 40 …).', question: 'От колко започва и през колко отива?', look: 'Провери дали започва от 0. Ако започва от друго число, разликите изглеждат по-големи, отколкото са.', sheets: 'Персонализиране → Вертикална ос (минимум и максимум)' },
+        xAxis: { name: 'Хоризонтална ос и групи', what: 'Надписите под колоните: какво сравняваме (тук: групите A–F).', question: 'Какво сравнява графиката?', look: 'Всяка колона е една група. Прочети имената, преди да гледаш височините.', sheets: 'Персонализиране → Хоризонтална ос' },
+        bars: { name: 'Колони (данните)', what: 'Самите стойности. Височината на колоната е числото.', question: 'Колко е всяка стойност и коя е най-голяма?', look: 'Сравнявай височините, но винаги спрямо скалата.', sheets: 'Персонализиране → Поредица (цвят на колоните)' },
+        labels: { name: 'Етикети със стойности', what: 'Точното число върху всяка колона.', question: 'Колко точно е?', look: 'С етикети не гадаеш по скалата. Особено важни са, когато стойностите са близки.', sheets: 'Персонализиране → Поредица → етикети с данни' },
+        grid: { name: 'Линии на мрежата', what: 'Тънките хоризонтални линии зад колоните.', question: 'До коя стойност стига колоната?', look: 'Помагат на окото да проследи височината до скалата. Не трябва да са по-ярки от данните.', sheets: 'Персонализиране → Линии на решетката и деления' },
+        pass: { name: 'Линия за минимум', what: 'Хоризонтална линия на 50 точки: границата, с която сравняваме.', question: 'Кой е над границата и кой под нея?', look: 'Всичко над линията е минало, всичко под нея не е. Гледай колко далеч е всяка колона от линията.', sheets: 'Втора колона с числото 50 на всеки ред, показана като линия (комбинирана диаграма). Учим го в следващия час.' },
+        legend: { name: 'Легенда', what: 'Обяснението какво значи всеки цвят и всяка линия.', question: 'Какво значи синьото и какво значи оранжевата линия?', look: 'Нужна е, когато на графиката има повече от един вид данни.', sheets: 'Персонализиране → Легенда' }
+      },
+      order: ['title', 'yTitle', 'scale', 'xAxis', 'bars', 'labels', 'grid', 'pass', 'legend'],
+      trapNote: 'Капан! Вертикалната ос вече започва от 40, а не от 0. Група E изглежда много пъти по-добра от група B, но всъщност има 81 срещу 45 точки – по-малко от 2 пъти повече. Винаги гледай от колко започва скалата.',
+      draw(trap) {
+        const box = { x: 100, y: 84, w: 560, h: 296 };
+        const yMin = trap ? 40 : 0, yMax = 100;
+        const ticks = trap ? [40, 50, 60, 70, 80, 90, 100] : [0, 20, 40, 60, 80, 100];
+        const yOf = v => box.y + box.h - (Math.max(v, yMin) - yMin) / (yMax - yMin) * box.h;
+        const slot = box.w / this.data.length, bw = slot * 0.55;
+        const gGrid = group('grid'); hit(gGrid, box.x - 4, box.y - 4, box.w + 8, box.h + 8);
+        ticks.forEach(t => el('line', { x1: box.x, x2: box.x + box.w, y1: yOf(t), y2: yOf(t), stroke: '#d9e2ef' }, gGrid));
+        const gBars = group('bars');
+        hit(gBars, box.x + 6, box.y + 20, box.w - 12, box.h - 20);
+        this.data.forEach((d, i) => el('rect', { x: box.x + i * slot + (slot - bw) / 2, y: yOf(d[1]), width: bw, height: box.y + box.h - yOf(d[1]), fill: BLUE, rx: 4 }, gBars));
+        const gPass = group('pass'); hit(gPass, box.x - 4, yOf(50) - 10, box.w + 8, 20);
+        el('line', { x1: box.x, x2: box.x + box.w, y1: yOf(50), y2: yOf(50), stroke: AMBER, 'stroke-width': 4, 'stroke-dasharray': '10 6' }, gPass);
+        const gLab = group('labels'); hit(gLab, box.x, box.y - 12, box.w, 30);
+        this.data.forEach((d, i) => labelBg(gLab, box.x + i * slot + slot / 2, yOf(d[1]) - 8, d[1]));
+        const gScale = group('scale'); hit(gScale, box.x - 48, box.y - 10, 46, box.h + 20);
+        el('line', { x1: box.x, x2: box.x, y1: box.y, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gScale);
+        ticks.forEach(t => el('text', { x: box.x - 10, y: yOf(t) + 5, 'text-anchor': 'end', 'font-size': 14, fill: '#475467' }, gScale, t));
+        const gX = group('xAxis'); hit(gX, box.x, box.y + box.h + 2, box.w, 52);
+        el('line', { x1: box.x, x2: box.x + box.w, y1: box.y + box.h, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gX);
+        this.data.forEach((d, i) => el('text', { x: box.x + i * slot + slot / 2, y: box.y + box.h + 22, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#344054' }, gX, 'Група ' + d[0]));
+        const gY = group('yTitle'); hit(gY, 14, box.y, 34, box.h);
+        el('text', { x: 34, y: box.y + box.h / 2, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#344054', transform: 'rotate(-90 34 ' + (box.y + box.h / 2) + ')' }, gY, 'Точки (от 100)');
+        title('Лабораторен тест по химия – точки по групи');
+        legend([{ kind: 'box', color: BLUE, text: 'Точки' }, { kind: 'line', color: AMBER, dash: true, text: 'Минимум за успех (50 точки)' }], 170);
+      },
+      steps: [
+        { t: 'Заглавие', part: 'title', q: 'За какво е графиката?', a: 'Точки от лабораторен тест по химия, по групи.' },
+        { t: 'Оси и единици', part: 'yTitle', q: 'Какво има по двете оси и в какви единици?', a: 'Хоризонтално: групите A–F. Вертикално: точки от 100.' },
+        { t: 'Скала', part: 'scale', q: 'От колко започва скалата и през колко отива?', a: 'От 0 до 100, през 20. Започва от 0, значи височините може да се сравняват честно.' },
+        { t: 'Линии и цветове', part: 'pass', q: 'Какво значи оранжевата линия?', a: 'Минимумът за успех – 50 точки. Над нея групата е минала, под нея не е.' },
+        { t: 'Извод', part: 'bars', q: 'Какво се вижда?', a: '4 групи са минали, 2 не са (B с 45 и D с 38). Най-добре е група E с 81 точки. Група F е минала на косъм – с 52.' }
+      ],
+      quiz: [
+        { type: 'choice', q: '1. Какво показва графиката?', options: ['Колко ученици има във всяка група', 'Точки от лабораторен тест по групи', 'Колко минути е продължил тестът'], answer: 1, ok: 'Точно така – прочете го от заглавието.', no: 'Погледни заглавието и името на вертикалната ос.' },
+        { type: 'number', q: '2. Колко групи са под линията за минимум?', answer: 2, ok: 'Да – групи B и D.', no: 'Брой колоните, които не стигат до оранжевата линия.' },
+        { type: 'number', q: '3. С колко точки група D не достига до минимума?', answer: 12, ok: 'Да: 50 – 38 = 12 точки.', no: 'Виж етикета на група D и го извади от 50.' },
+        { type: 'choice', q: '4. Включи „Капана“. Колко пъти повече точки има група E от група B?', options: ['Около 6 пъти – колоната е много по-висока', 'По-малко от 2 пъти – 81 срещу 45', 'Еднакво са'], answer: 1, ok: 'Точно така! Колоната изглежда много по-висока само защото скалата започва от 40.', no: 'Не гледай височината – гледай числата в етикетите и от колко започва скалата.' }
+      ]
+    };
+
+    /* ---------- 2. Лентова ---------- */
+    const barType = {
+      tab: 'Лентова', sub: 'Bar chart',
+      when: 'Кога я използвам: когато сравнявам групи и имената им са дълги – хоризонтално се четат по-лесно.',
+      data: [['Меден сулфат', 180], ['Сода бикарбонат', 150], ['Готварска сол', 120], ['Захар', 95], ['Лимонена киселина', 70]],
+      hide: ['title', 'xTitle', 'labels'],
+      parts: {
+        title: { name: 'Заглавие', what: 'Изречението най-горе, което казва какво показва графиката.', question: 'За какво е тази графика?', look: 'Тук разбираш, че се мери времето за разтваряне, а не количество.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → Заглавие на диаграмата' },
+        xTitle: { name: 'Име на хоризонталната ос и мерна единица', what: 'При лентовата графика числата са по хоризонталната ос (тук: секунди).', question: 'Какво мерим и в какви единици?', look: 'Внимавай: осите са разменени спрямо стълбовидната. Стойностите са хоризонтално.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → заглавие на хоризонталната ос' },
+        scale: { name: 'Скала', what: 'Числата по хоризонталната ос (0, 50, 100 …).', question: 'От колко започва и през колко отива?', look: 'И тук скалата трябва да започва от 0, иначе разликите в дължините лъжат.', sheets: 'Персонализиране → Хоризонтална ос (минимум и максимум)' },
+        cats: { name: 'Категории с дълги имена', what: 'Имената на веществата отляво – всяко на свой ред.', question: 'Какво сравняваме?', look: 'Затова избираме лентова графика: дългите имена се четат хоризонтално, без да се въртят или режат.', sheets: 'Персонализиране → Вертикална ос (етикетите)' },
+        bars: { name: 'Ленти (данните)', what: 'Дължината на лентата е стойността.', question: 'Кое е най-дълго и кое най-кратко?', look: 'Лентите са подредени от най-дългата към най-късата – така сравнението е мигновено.', sheets: 'Подредбата става в таблицата: Данни → Сортиране на диапазона' },
+        labels: { name: 'Етикети със стойности', what: 'Точното число в края на всяка лента.', question: 'Колко точно е?', look: 'Не гадаеш по скалата – четеш числото директно.', sheets: 'Персонализиране → Поредица → етикети с данни' },
+        grid: { name: 'Линии на мрежата', what: 'Вертикалните тънки линии зад лентите.', question: 'До коя стойност стига лентата?', look: 'При лентовата графика мрежата е вертикална.', sheets: 'Персонализиране → Линии на решетката и деления' }
+      },
+      order: ['title', 'xTitle', 'scale', 'cats', 'bars', 'labels', 'grid'],
+      trapNote: 'Капан! Хоризонталната ос започва от 60, а не от 0. Меденият сулфат изглежда да се разтваря 12 пъти по-дълго от лимонената киселина, но е 180 срещу 70 секунди – около 2,6 пъти.',
+      draw(trap) {
+        const box = { x: 210, y: 84, w: 460, h: 290 };
+        const xMin = trap ? 60 : 0, xMax = 200;
+        const ticks = trap ? [60, 80, 100, 120, 140, 160, 180, 200] : [0, 50, 100, 150, 200];
+        const xOf = v => box.x + (Math.max(v, xMin) - xMin) / (xMax - xMin) * box.w;
+        const slot = box.h / this.data.length, bh = slot * 0.55;
+        const gGrid = group('grid'); hit(gGrid, box.x - 4, box.y - 4, box.w + 8, box.h + 8);
+        ticks.forEach(t => el('line', { x1: xOf(t), x2: xOf(t), y1: box.y, y2: box.y + box.h, stroke: '#d9e2ef' }, gGrid));
+        const gBars = group('bars'); hit(gBars, box.x, box.y + 4, box.w - 6, box.h - 8);
+        this.data.forEach((d, i) => el('rect', { x: box.x, y: box.y + i * slot + (slot - bh) / 2, width: xOf(d[1]) - box.x, height: bh, fill: BLUE, rx: 4 }, gBars));
+        const gLab = group('labels'); hit(gLab, box.x + box.w - 120, box.y, 126, box.h);
+        this.data.forEach((d, i) => labelBg(gLab, Math.min(xOf(d[1]) + 26, box.x + box.w - 10), box.y + i * slot + slot / 2 + 6, d[1]));
+        const gCats = group('cats'); hit(gCats, 14, box.y, box.x - 20, box.h);
+        el('line', { x1: box.x, x2: box.x, y1: box.y, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gCats);
+        this.data.forEach((d, i) => el('text', { x: box.x - 10, y: box.y + i * slot + slot / 2 + 5, 'text-anchor': 'end', 'font-size': 15, 'font-weight': 700, fill: '#344054' }, gCats, d[0]));
+        const gScale = group('scale'); hit(gScale, box.x - 6, box.y + box.h + 2, box.w + 12, 26);
+        el('line', { x1: box.x, x2: box.x + box.w, y1: box.y + box.h, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gScale);
+        ticks.forEach(t => el('text', { x: xOf(t), y: box.y + box.h + 20, 'text-anchor': 'middle', 'font-size': 14, fill: '#475467' }, gScale, t));
+        const gXT = group('xTitle'); hit(gXT, box.x, box.y + box.h + 30, box.w, 28);
+        el('text', { x: box.x + box.w / 2, y: box.y + box.h + 50, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#344054' }, gXT, 'Време за разтваряне (секунди)');
+        title('Колко бързо се разтварят 5 г вещество във вода');
+      },
+      steps: [
+        { t: 'Заглавие', part: 'title', q: 'За какво е графиката?', a: 'Колко секунди са нужни 5 г от различни вещества да се разтворят във вода.' },
+        { t: 'Оси и единици', part: 'xTitle', q: 'Какво има по двете оси?', a: 'Вертикално: веществата. Хоризонтално: време в секунди. Осите са разменени спрямо стълбовидната.' },
+        { t: 'Скала', part: 'scale', q: 'От колко започва скалата?', a: 'От 0 до 200 секунди, през 50. Започва от 0 – дължините може да се сравняват честно.' },
+        { t: 'Подредба', part: 'bars', q: 'Как са подредени лентите?', a: 'От най-дългото време към най-краткото. Така веднага виждаш кое е най-бавно и кое най-бързо.' },
+        { t: 'Извод', part: 'labels', q: 'Какво се вижда?', a: 'Най-бързо се разтваря лимонената киселина (70 s), най-бавно – меденият сулфат (180 s).' }
+      ],
+      quiz: [
+        { type: 'choice', q: '1. Кое вещество се разтваря най-бързо?', options: ['Меден сулфат', 'Лимонена киселина', 'Захар'], answer: 1, ok: 'Да – най-късата лента, 70 секунди.', no: 'Най-бързо = най-малко секунди = най-къса лента.' },
+        { type: 'number', q: '2. С колко секунди по-бавно се разтваря содата бикарбонат от захарта?', answer: 55, ok: 'Да: 150 – 95 = 55 секунди.', no: 'Виж етикетите на двете ленти и извади по-малкото число.' },
+        { type: 'choice', q: '3. Защо тук е избрана лентова, а не стълбовидна графика?', options: ['Защото е по-цветна', 'Защото имената на веществата са дълги и се четат по-лесно хоризонтално', 'Защото данните са във времето'], answer: 1, ok: 'Точно така.', no: 'Погледни надписите вляво – колко дълги са?' },
+        { type: 'choice', q: '4. Включи „Капана“. Колко пъти по-дълго се разтваря меденият сулфат от лимонената киселина?', options: ['Около 12 пъти', 'Около 2,6 пъти', 'Еднакво'], answer: 1, ok: 'Да – 180 срещу 70. Дългата лента лъже, защото скалата започва от 60.', no: 'Гледай числата, не дължината – и от колко започва скалата.' }
+      ]
+    };
+
+    /* ---------- 3. Линейна ---------- */
+    const lineType = {
+      tab: 'Линейна', sub: 'Line chart',
+      when: 'Кога я използвам: когато показвам промяна или развитие във времето.',
+      data: [[0, 20], [2, 35], [4, 50], [6, 63], [8, 74], [10, 82]],
+      hide: ['title', 'yTitle', 'xTitle', 'legend', 'labels'],
+      parts: {
+        title: { name: 'Заглавие', what: 'Изречението най-горе: какво се променя.', question: 'За какво е тази графика?', look: 'Тук се следи как температурата на водата се променя, докато я загряваме.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → Заглавие на диаграмата' },
+        yTitle: { name: 'Име на вертикалната ос и мерна единица', what: 'Какво се мери (тук: температура в °C).', question: 'Какво мерим и в какви единици?', look: 'Без °C числото 50 не значи нищо.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → заглавие на вертикалната ос' },
+        scale: { name: 'Скала', what: 'Числата по вертикалната ос.', question: 'От колко до колко отива?', look: 'При линейната графика скалата понякога не започва от 0 – това е допустимо, но трябва да го видиш.', sheets: 'Персонализиране → Вертикална ос (минимум и максимум)' },
+        xAxis: { name: 'Ос на времето', what: 'Хоризонталната ос показва времето (минути).', question: 'Кога е направено всяко измерване?', look: 'Стъпките трябва да са равни: 0, 2, 4, 6 … Ако една стъпка липсва, наклонът лъже.', sheets: 'Персонализиране → Хоризонтална ос' },
+        line: { name: 'Линия (развитието)', what: 'Свързва измерванията и показва как се променя стойността.', question: 'Расте ли, пада ли, или е равна?', look: 'Колкото по-стръмна е линията, толкова по-бързо е промяната.', sheets: 'Персонализиране → Поредица (цвят и дебелина на линията)' },
+        points: { name: 'Точки (измерванията)', what: 'Кръгчетата са истинските измервания. Линията между тях е само свързване.', question: 'Къде точно сме мерили?', look: 'Между две точки не знаем със сигурност какво е станало.', sheets: 'Персонализиране → Поредица (вид и размер на точките)' },
+        labels: { name: 'Етикети със стойности', what: 'Точното число до всяка точка.', question: 'Колко точно е било?', look: 'Помагат да сметнеш с колко се е променила стойността.', sheets: 'Персонализиране → Поредица → етикети с данни' },
+        target: { name: 'Линия за целева стойност', what: 'Хоризонтална линия на 70 °C – температурата, до която искаме да стигнем.', question: 'Кога сме стигнали целта?', look: 'Търси мястото, където синята линия пресича оранжевата.', sheets: 'Втора колона с числото 70 на всеки ред, показана като втора линия.' },
+        legend: { name: 'Легенда', what: 'Какво значи синята и какво оранжевата линия.', question: 'Коя линия е измерването и коя е целта?', look: 'Нужна е, защото има две линии.', sheets: 'Персонализиране → Легенда' }
+      },
+      order: ['title', 'yTitle', 'scale', 'xAxis', 'line', 'points', 'labels', 'target', 'legend'],
+      trapNote: 'Капан! На оста на времето липсва 8-ата минута, но 10-ата е сложена на същото разстояние. Изглежда, че в края водата се загрява по-бързо, а всъщност е по-бавно. Провери дали стъпките по оста са равни.',
+      draw(trap) {
+        const box = { x: 100, y: 84, w: 540, h: 290 };
+        const pts = trap ? this.data.filter(d => d[0] !== 8) : this.data;
+        const xOf = (i) => box.x + 20 + i * ((box.w - 40) / (pts.length - 1));
+        const yOf = v => box.y + box.h - v / 100 * box.h;
+        const ticks = [0, 20, 40, 60, 80, 100];
+        const gGrid = group('grid'); // мрежата е част от скалата тук
+        ticks.forEach(t => el('line', { x1: box.x, x2: box.x + box.w, y1: yOf(t), y2: yOf(t), stroke: '#d9e2ef' }, gGrid));
+        const gT = group('target'); hit(gT, box.x - 4, yOf(70) - 10, box.w + 8, 20);
+        el('line', { x1: box.x, x2: box.x + box.w, y1: yOf(70), y2: yOf(70), stroke: AMBER, 'stroke-width': 4, 'stroke-dasharray': '10 6' }, gT);
+        const gL = group('line'); hit(gL, box.x + 10, box.y + 20, box.w - 20, box.h - 30);
+        el('polyline', { points: pts.map((d, i) => xOf(i) + ',' + yOf(d[1])).join(' '), fill: 'none', stroke: BLUE, 'stroke-width': 4 }, gL);
+        const gP = group('points'); hit(gP, xOf(0) - 14, yOf(pts[0][1]) - 14, 28, 28);
+        pts.forEach((d, i) => el('circle', { cx: xOf(i), cy: yOf(d[1]), r: 7, fill: '#fff', stroke: BLUE, 'stroke-width': 3 }, gP));
+        const gLab = group('labels'); hit(gLab, box.x + box.w - 70, box.y, 76, 60);
+        pts.forEach((d, i) => labelBg(gLab, xOf(i), yOf(d[1]) - 14, d[1]));
+        const gS = group('scale'); hit(gS, box.x - 48, box.y - 10, 46, box.h + 20);
+        el('line', { x1: box.x, x2: box.x, y1: box.y, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gS);
+        ticks.forEach(t => el('text', { x: box.x - 10, y: yOf(t) + 5, 'text-anchor': 'end', 'font-size': 14, fill: '#475467' }, gS, t));
+        const gX = group('xAxis'); hit(gX, box.x, box.y + box.h + 2, box.w, 26);
+        el('line', { x1: box.x, x2: box.x + box.w, y1: box.y + box.h, y2: box.y + box.h, stroke: MUTED, 'stroke-width': 1.5 }, gX);
+        pts.forEach((d, i) => el('text', { x: xOf(i), y: box.y + box.h + 20, 'text-anchor': 'middle', 'font-size': 14, fill: '#344054', 'font-weight': 700 }, gX, d[0]));
+        const gXT = group('xTitle'); hit(gXT, box.x, box.y + box.h + 30, box.w, 28);
+        el('text', { x: box.x + box.w / 2, y: box.y + box.h + 50, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#344054' }, gXT, 'Време (минути)');
+        gXT.addEventListener('click', e => { e.stopPropagation(); select('xAxis'); });
+        const gY = group('yTitle'); hit(gY, 14, box.y, 34, box.h);
+        el('text', { x: 34, y: box.y + box.h / 2, 'text-anchor': 'middle', 'font-size': 15, 'font-weight': 700, fill: '#344054', transform: 'rotate(-90 34 ' + (box.y + box.h / 2) + ')' }, gY, 'Температура (°C)');
+        title('Температура на водата при нагряване');
+        legend([{ kind: 'line', color: BLUE, text: 'Измерена температура' }, { kind: 'line', color: AMBER, dash: true, text: 'Цел: 70 °C' }], 190);
+      },
+      steps: [
+        { t: 'Заглавие', part: 'title', q: 'Какво се променя?', a: 'Температурата на водата, докато я загряваме.' },
+        { t: 'Оси и единици', part: 'yTitle', q: 'Какво има по двете оси?', a: 'Хоризонтално: време в минути. Вертикално: температура в °C.' },
+        { t: 'Стъпки по оста', part: 'xAxis', q: 'Равни ли са стъпките по времето?', a: 'Да – през 2 минути: 0, 2, 4, 6, 8, 10. Значи наклонът може да се сравнява.' },
+        { t: 'Линии', part: 'target', q: 'Какво значи оранжевата линия?', a: 'Целевата температура – 70 °C. Водата я достига между 6-ата и 8-ата минута.' },
+        { t: 'Извод', part: 'line', q: 'Какво се вижда?', a: 'Температурата расте през цялото време, но в началото по-бързо (+15 °C за 2 минути), а в края по-бавно (+8 °C).' }
+      ],
+      quiz: [
+        { type: 'number', q: '1. Колко е температурата на 4-ата минута (в °C)?', answer: 50, ok: 'Да – 50 °C.', no: 'Намери 4 на хоризонталната ос и виж точката над нея.' },
+        { type: 'choice', q: '2. Кога водата достига целта от 70 °C?', options: ['Между 2-рата и 4-ата минута', 'Между 6-ата и 8-ата минута', 'Не я достига'], answer: 1, ok: 'Да – там синята линия пресича оранжевата.', no: 'Търси къде синята линия минава над оранжевата.' },
+        { type: 'choice', q: '3. Кога водата се загрява по-бързо?', options: ['В началото', 'В края', 'Еднакво през цялото време'], answer: 0, ok: 'Да – в началото линията е по-стръмна: +15 °C срещу +8 °C в края.', no: 'Сравни наклона на линията в началото и в края.' },
+        { type: 'choice', q: '4. Включи „Капана“. Вярно ли е, че в края водата се загрява по-бързо?', options: ['Да, линията е по-стръмна', 'Не – на оста липсва 8-ата минута и стъпките не са равни'], answer: 1, ok: 'Точно така! Последната стъпка е 4 минути, а изглежда като 2.', no: 'Прочети числата по хоризонталната ос. Равни ли са стъпките?' }
+      ]
+    };
+
+    /* ---------- 4. Кръгова ---------- */
+    const pieType = {
+      tab: 'Кръгова', sub: 'Pie chart',
+      when: 'Кога я използвам: когато показвам части от едно цяло – всички части заедно са 100%.',
+      data: [['Вулкан', 35, '#1664d9'], ['Разтваряне', 25, '#0f9f9a'], ['Кристали', 20, '#f2a31b'], ['Индикатори', 15, '#7c3aed'], ['Друго', 5, '#98a2b3']],
+      trapData: [['Вулкан', 60, '#1664d9'], ['Разтваряне', 40, '#0f9f9a'], ['Кристали', 35, '#f2a31b'], ['Индикатори', 30, '#7c3aed'], ['Друго', 10, '#98a2b3']],
+      hide: ['title', 'whole', 'labels', 'legend'],
+      parts: {
+        title: { name: 'Заглавие', what: 'Изречението най-горе: какво е цялото, което делим.', question: 'За какво е тази графика?', look: 'Тук цялото са отговорите от една анкета.', sheets: 'Персонализиране → Заглавия на диаграмата и осите → Заглавие на диаграмата' },
+        whole: { name: 'Цялото (100%)', what: 'Подзаглавието казва колко е цялото: 40 ученици = 100%.', question: 'От какво са тези проценти?', look: 'Без него не знаеш дали 25% са 10 души или 1000.', sheets: 'Пиши го в заглавието или в подзаглавието на диаграмата.' },
+        slices: { name: 'Сектори (частите)', what: 'Всеки сектор е една част. Колкото по-голям е, толкова по-голяма е частта.', question: 'Коя част е най-голяма?', look: 'Окото сравнява трудно сектори с близък размер – затова гледай и процентите.', sheets: 'Персонализиране → Поредица / сектори (цветове)' },
+        labels: { name: 'Етикети с проценти', what: 'Процентът върху всеки сектор.', question: 'Колко точно е всяка част?', look: 'Сборът на всички проценти трябва да е 100%.', sheets: 'Персонализиране → настройки на кръговата диаграма (етикет на секторите)' },
+        legend: { name: 'Легенда', what: 'Кой цвят коя част е.', question: 'Кой сектор какво е?', look: 'При кръговата графика без легенда (или етикети с имена) не знаеш кой сектор какъв е.', sheets: 'Персонализиране → Легенда' }
+      },
+      order: ['title', 'whole', 'slices', 'labels', 'legend'],
+      trapNote: 'Капан! Тук анкетата е била с „Квадратчета за отметка“ – всеки е избрал по няколко опита. Процентите правят 175%, а не 100%. Кръгова графика от такива данни лъже: няма едно цяло, което да се дели. За тях използвай стълбовидна графика.',
+      draw(trap) {
+        const data = trap ? this.trapData : this.data;
+        const total = data.reduce((s, d) => s + d[1], 0);
+        const cx = 290, cy = 285, r = 155;
+        const gS = group('slices'); hit(gS, cx - r - 8, cy - r - 8, 2 * r + 16, 2 * r + 16);
+        let a0 = -Math.PI / 2;
+        const mids = [];
+        data.forEach(d => {
+          const a1 = a0 + d[1] / total * 2 * Math.PI;
+          const large = a1 - a0 > Math.PI ? 1 : 0;
+          const p = 'M ' + cx + ' ' + cy + ' L ' + (cx + r * Math.cos(a0)) + ' ' + (cy + r * Math.sin(a0)) +
+            ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + (cx + r * Math.cos(a1)) + ' ' + (cy + r * Math.sin(a1)) + ' Z';
+          el('path', { d: p, fill: d[2], stroke: '#fff', 'stroke-width': 2 }, gS);
+          mids.push((a0 + a1) / 2);
+          a0 = a1;
+        });
+        const gLab = group('labels'); hit(gLab, cx - r * 0.75, cy - r * 0.75, r * 1.5, r * 1.5);
+        data.forEach((d, i) => labelBg(gLab, cx + r * 0.66 * Math.cos(mids[i]), cy + r * 0.66 * Math.sin(mids[i]) + 6, d[1] + '%'));
+        const gLeg = group('legend'); hit(gLeg, 490, 160, 200, 30 * data.length + 20);
+        data.forEach((d, i) => {
+          el('rect', { x: 505, y: 172 + i * 30, width: 18, height: 18, rx: 4, fill: d[2] }, gLeg);
+          el('text', { x: 532, y: 186 + i * 30, 'font-size': 15, fill: '#344054', 'font-weight': 700 }, gLeg, d[0]);
+        });
+        const gW = group('whole'); hit(gW, 160, 46, 400, 28);
+        el('text', { x: 360, y: 66, 'text-anchor': 'middle', 'font-size': 15, fill: '#475467', 'font-weight': 700 }, gW, trap ? 'Анкета с няколко отговора: 40 ученици, сбор ' + total + '%' : 'Анкета: 40 ученици = 100%');
+        title(trap ? 'Кои опити ти харесват? (няколко отговора)' : 'Любим опит в часа по химия');
+      },
+      steps: [
+        { t: 'Заглавие', part: 'title', q: 'За какво е графиката?', a: 'Кой е любимият опит на учениците в часа по химия.' },
+        { t: 'Цялото', part: 'whole', q: 'Какво е 100%?', a: 'Отговорите на 40 ученици. Всеки е избрал точно един опит.' },
+        { t: 'Части', part: 'slices', q: 'Кой сектор е най-голям?', a: 'Вулкан – 35%. Следват Разтваряне и Кристали.' },
+        { t: 'Проценти', part: 'labels', q: 'Колко прави сборът?', a: '35 + 25 + 20 + 15 + 5 = 100%. Затова кръговата графика е подходяща.' },
+        { t: 'Извод', part: 'legend', q: 'Какво се вижда?', a: 'Повече от една трета от класа предпочита Вулкана. Индикаторите и „Друго“ заедно са само 20%.' }
+      ],
+      quiz: [
+        { type: 'choice', q: '1. Кой опит е най-любим?', options: ['Кристали', 'Вулкан', 'Индикатори'], answer: 1, ok: 'Да – 35%, най-големият сектор.', no: 'Търси най-големия сектор и провери процента му.' },
+        { type: 'number', q: '2. Колко ученици са избрали Разтваряне? (25% от 40)', answer: 10, ok: 'Да: 25% от 40 = 10 ученици.', no: '25% е една четвърт. Колко е една четвърт от 40?' },
+        { type: 'number', q: '3. Колко процента са Кристали и Индикатори заедно?', answer: 35, ok: 'Да: 20% + 15% = 35%.', no: 'Събери етикетите на двата сектора.' },
+        { type: 'choice', q: '4. Включи „Капана“. Става ли кръгова графика за анкета с „Квадратчета за отметка“?', options: ['Да, винаги', 'Не – всеки избира няколко отговора и сборът е над 100%'], answer: 1, ok: 'Точно така! Няма едно цяло, което да се дели. Използвай стълбовидна графика.', no: 'Събери процентите при включен капан. Колко прави?' }
+      ]
+    };
+
+    const types = { column: columnType, bar: barType, line: lineType, pie: pieType };
+    let current = 'column', trap = false, hideMode = false, activePart = null;
+
+    const chips = document.getElementById('chips');
+    const stepsEl = document.getElementById('steps');
+    const stepBox = document.getElementById('stepBox');
+    const quizEl = document.getElementById('quiz');
+
+    function draw() {
+      const t = types[current];
+      svg.innerHTML = '';
+      t.draw(trap);
+      if (hideMode) {
+        t.hide.forEach(k => svg.querySelectorAll('[data-part="' + k + '"]').forEach(g => g.classList.add('hidden-part')));
+      }
+      if (activePart) svg.querySelectorAll('[data-part="' + activePart + '"]').forEach(g => g.classList.add('active'));
+    }
+
+    function select(key) {
+      const t = types[current];
+      if (!t.parts[key]) return;
+      activePart = key;
+      const p = t.parts[key];
+      document.getElementById('exTitle').textContent = p.name;
+      document.getElementById('exWhat').textContent = p.what;
+      document.getElementById('exQuestion').textContent = p.question;
+      document.getElementById('exLook').textContent = p.look;
+      document.getElementById('exSheets').textContent = p.sheets;
+      chips.querySelectorAll('.chip').forEach(c => c.classList.toggle('active', c.dataset.part === key));
+      draw();
+    }
+
+    function resetExplain() {
+      activePart = null;
+      document.getElementById('exTitle').textContent = 'Избери част';
+      document.getElementById('exWhat').textContent = 'Кликни върху част от графиката или върху бутон под нея.';
+      document.getElementById('exQuestion').textContent = '–';
+      document.getElementById('exLook').textContent = '–';
+      document.getElementById('exSheets').textContent = 'Редактор на диаграми → Персонализиране';
+    }
+
+    function showStep(i) {
+      const s = types[current].steps[i];
+      stepsEl.querySelectorAll('.step-btn').forEach((b, j) => b.classList.toggle('active', i === j));
+      stepBox.innerHTML = '<strong>Стъпка ' + (i + 1) + ': ' + s.t + '</strong><br>' + s.q +
+        '<br><button class="button secondary reveal-btn" type="button">Покажи отговора</button><p class="answer">' + s.a + '</p>';
+      stepBox.querySelector('.reveal-btn').addEventListener('click', () => stepBox.querySelector('.answer').classList.add('show'));
+      select(s.part);
+    }
+
+    function buildType() {
+      const t = types[current];
+      trap = false; hideMode = false;
+      const trapBtn = document.getElementById('trapBtn'), hideBtn = document.getElementById('hideBtn');
+      trapBtn.setAttribute('aria-pressed', 'false'); trapBtn.textContent = 'Покажи капана';
+      hideBtn.setAttribute('aria-pressed', 'false'); hideBtn.textContent = 'Скрий надписите';
+      document.getElementById('trapNote').classList.remove('show');
+      document.getElementById('trapNote').textContent = t.trapNote;
+      document.getElementById('whenText').textContent = t.when;
+      document.getElementById('labTitle').textContent = '1. Разгледай частите: ' + t.tab.toLowerCase() + ' графика';
+      svg.setAttribute('aria-label', t.tab + ' графика с измислени данни');
+
+      chips.innerHTML = '';
+      t.order.forEach(k => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'chip'; b.dataset.part = k; b.textContent = t.parts[k].name;
+        b.addEventListener('click', () => select(k));
+        chips.appendChild(b);
+      });
+
+      stepsEl.innerHTML = '';
+      t.steps.forEach((s, i) => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'step-btn';
+        b.innerHTML = (i + 1) + '. ' + s.t + '<span>' + s.q + '</span>';
+        b.addEventListener('click', () => showStep(i));
+        stepsEl.appendChild(b);
+      });
+      stepBox.textContent = 'Натисни стъпка 1.';
+
+      quizEl.innerHTML = '';
+      document.getElementById('score').textContent = '';
+      t.quiz.forEach((item, i) => {
+        const div = document.createElement('div');
+        div.className = 'q';
+        let html = '<p>' + item.q + '</p>';
+        if (item.type === 'choice') item.options.forEach((o, j) => { html += '<label><input type="radio" name="q' + i + '" value="' + j + '"> ' + o + '</label>'; });
+        else html += '<input type="number" id="q' + i + '" inputmode="numeric" aria-label="Отговор на въпрос ' + (i + 1) + '">';
+        html += '<div class="feedback" id="f' + i + '"></div>';
+        div.innerHTML = html;
+        quizEl.appendChild(div);
+      });
+
+      document.querySelectorAll('.type-tab').forEach(b => b.setAttribute('aria-selected', b.dataset.type === current ? 'true' : 'false'));
+      resetExplain();
+      draw();
+    }
+
+    const tabsEl = document.getElementById('typeTabs');
+    Object.keys(types).forEach(k => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'type-tab'; b.dataset.type = k; b.setAttribute('role', 'tab');
+      b.innerHTML = types[k].tab + ' графика<span>' + types[k].sub + '</span>';
+      b.addEventListener('click', () => { current = k; buildType(); });
+      tabsEl.appendChild(b);
+    });
+
+    document.getElementById('hideBtn').addEventListener('click', e => {
+      hideMode = !hideMode;
+      e.currentTarget.setAttribute('aria-pressed', hideMode);
+      e.currentTarget.textContent = hideMode ? 'Покажи надписите' : 'Скрий надписите';
+      draw();
+    });
+    document.getElementById('trapBtn').addEventListener('click', e => {
+      trap = !trap;
+      e.currentTarget.setAttribute('aria-pressed', trap);
+      e.currentTarget.textContent = trap ? 'Махни капана' : 'Покажи капана';
+      document.getElementById('trapNote').classList.toggle('show', trap);
+      draw();
+    });
+    document.getElementById('checkAll').addEventListener('click', () => {
+      const quiz = types[current].quiz;
+      let score = 0;
+      quiz.forEach((item, i) => {
+        let val = null;
+        if (item.type === 'choice') { const c = document.querySelector('input[name="q' + i + '"]:checked'); val = c ? Number(c.value) : null; }
+        else { const v = document.getElementById('q' + i).value; val = v === '' ? null : Number(v.replace(',', '.')); }
+        const f = document.getElementById('f' + i);
+        if (val === null) { f.textContent = 'Няма отговор.'; f.className = 'feedback no'; return; }
+        if (val === item.answer) { score++; f.textContent = item.ok; f.className = 'feedback ok'; }
+        else { f.textContent = item.no; f.className = 'feedback no'; }
+      });
+      document.getElementById('score').textContent = 'Резултат: ' + score + ' от ' + quiz.length;
+    });
+
+    buildType();
+  </script>
+</body>
+</html>
