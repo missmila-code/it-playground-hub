@@ -1,0 +1,369 @@
+<!doctype html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Менюто на графиката | IT Playground Hub</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    .page-hero.grade-nine {
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.36), transparent 30%),
+        linear-gradient(135deg, #4c1d95 0%, #7c3aed 45%, #1664d9 100%);
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 24px;
+      padding: 22px;
+      background: var(--panel);
+      box-shadow: 0 14px 35px rgba(18, 32, 58, 0.08);
+    }
+    .panel h2 { font-size: clamp(1.35rem, 2.2vw, 1.8rem); margin: 0 0 8px; }
+    .panel > p { color: #5b6678; line-height: 1.55; }
+    .section { margin-top: 22px; }
+
+    /* Как да отворя редактора */
+    .open-steps { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+    .open-step { border-radius: 18px; padding: 14px 16px; background: #f4f0ff; line-height: 1.5; }
+    .open-step b { display: block; color: var(--violet); font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 4px; }
+
+    /* Лаборатория с менютата */
+    .lab { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr); gap: 18px; margin-top: 18px; align-items: start; }
+    .editor-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+    .editor-head h2 { margin: 0; }
+    .counter { border-radius: 999px; padding: 6px 14px; background: #067647; color: #fff; font-weight: 800; font-size: 0.9rem; }
+    .tabs { display: flex; gap: 0; margin: 16px 0 6px; border-bottom: 2px solid var(--line); }
+    .tab {
+      border: 0; background: none; font: inherit; font-weight: 900; font-size: 1rem;
+      padding: 10px 18px; color: var(--muted); cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px;
+    }
+    .tab[aria-selected="true"] { color: var(--violet); border-bottom-color: var(--violet); }
+    .rows { display: grid; gap: 4px; margin-top: 10px; }
+    .row {
+      display: grid;
+      grid-template-columns: 110px minmax(0, 1fr) 34px minmax(150px, 0.85fr);
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      border: 1px solid transparent;
+      border-radius: 16px;
+      padding: 8px 10px;
+      background: none;
+      font: inherit;
+      color: inherit;
+      text-align: left;
+      cursor: pointer;
+    }
+    .row:hover { background: #faf7ff; }
+    .row.active { background: #f4f0ff; border-color: #c4b5fd; }
+    .row .what { font-weight: 800; color: #344054; }
+    .connector { height: 2px; background: #a78bfa; position: relative; }
+    .connector::before { content: ""; position: absolute; left: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: #7c3aed; }
+    .mtag {
+      border: 1px solid #c4b5fd; border-radius: 10px; padding: 7px 10px; background: #ede9fe;
+      color: #4c1d95; font-family: Consolas, "Courier New", monospace; font-size: 0.86rem; font-weight: 700; line-height: 1.3;
+    }
+    .row.active .mtag { background: var(--violet); color: #fff; border-color: var(--violet); }
+
+    /* Макети на контролите */
+    .mock { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; min-width: 0; }
+    .m-input, .m-select, .m-btn {
+      border: 1px solid #cfd6e2; border-radius: 8px; background: #fff; padding: 6px 10px; font-size: 0.92rem;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+    }
+    .m-select::after { content: " ▾"; color: var(--muted); }
+    .m-btn { background: #f2f4f7; font-weight: 700; }
+    .m-sw { width: 26px; height: 22px; border-radius: 6px; border: 1px solid #cfd6e2; display: inline-block; }
+    .m-check { display: inline-flex; align-items: center; gap: 6px; font-size: 0.92rem; }
+    .m-check i { width: 16px; height: 16px; border-radius: 4px; background: var(--blue); display: inline-block; position: relative; }
+    .m-check i::after { content: "✓"; color: #fff; font-size: 12px; font-style: normal; position: absolute; left: 3px; top: -1px; }
+    .m-icons { display: inline-flex; gap: 4px; }
+    .m-icons span { width: 34px; height: 28px; border: 1px solid #cfd6e2; border-radius: 6px; background: #fff; display: inline-flex; align-items: end; justify-content: center; gap: 2px; padding-bottom: 4px; }
+    .m-icons span.on { border-color: var(--blue); background: #eaf2ff; }
+    .m-icons b { width: 4px; background: var(--blue); display: block; }
+    .m-small { color: var(--muted); font-size: 0.82rem; }
+
+    /* Обяснение */
+    .explain { position: sticky; top: 90px; }
+    .explain .label { margin: 0 0 4px; color: var(--muted); font-size: 0.78rem; font-weight: 900; letter-spacing: 0.06em; text-transform: uppercase; }
+    .explain .value { margin: 0 0 14px; line-height: 1.55; }
+    .explain .where { border-radius: 14px; padding: 12px 14px; background: #f4f0ff; color: #4c1d95; font-weight: 700; line-height: 1.5; margin: 0 0 14px; }
+    .explain ol { margin: 0 0 14px; padding-left: 22px; line-height: 1.55; }
+    .explain ol li { margin-bottom: 4px; }
+    .explain .why { border-radius: 14px; padding: 12px 14px; background: #ecfdf3; color: #05603a; font-weight: 700; line-height: 1.5; margin: 0 0 14px; }
+    .explain .trap { border-radius: 14px; padding: 12px 14px; background: #fde8ee; color: #8a1538; font-weight: 700; line-height: 1.5; margin: 0; }
+
+    /* Проблем → меню */
+    .problems { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .problem {
+      border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; background: #fff; font: inherit; text-align: left;
+      cursor: pointer; line-height: 1.45; color: inherit;
+    }
+    .problem:hover { border-color: #a78bfa; background: #faf7ff; }
+    .problem b { display: block; margin-bottom: 4px; }
+    .problem span { color: var(--violet); font-weight: 800; font-size: 0.9rem; }
+
+    /* Рецепта */
+    .recipe { display: grid; gap: 10px; margin-top: 14px; counter-reset: st; }
+    .recipe li { list-style: none; display: grid; grid-template-columns: 44px 1fr; gap: 12px; align-items: start; border-radius: 18px; padding: 14px 16px; background: #f4f7fb; line-height: 1.55; }
+    .recipe li::before { counter-increment: st; content: counter(st); width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, var(--violet), var(--blue)); color: #fff; font-weight: 900; display: grid; place-items: center; }
+    .recipe { padding: 0; }
+    .recipe .wrong { display: block; margin-top: 6px; color: #8a1538; font-weight: 700; }
+    .done { margin-top: 12px; border-radius: 14px; padding: 12px 14px; background: #ecfdf3; color: #05603a; font-weight: 800; line-height: 1.5; }
+    kbd, .path { font-family: Consolas, "Courier New", monospace; background: #ede9fe; color: #4c1d95; border-radius: 6px; padding: 1px 6px; font-size: 0.92em; font-weight: 700; }
+
+    .remember { margin-top: 22px; border-radius: 24px; padding: 22px; color: #fff; background: linear-gradient(135deg, #4c1d95, #1664d9); }
+    .remember h2 { color: #fff; margin-top: 0; }
+    .remember p { margin: 0 0 6px; font-size: 1.1rem; font-weight: 800; line-height: 1.6; }
+
+    @media (max-width: 980px) {
+      .lab { grid-template-columns: 1fr; }
+      .explain { position: static; }
+      .problems { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+    @media (max-width: 640px) {
+      .open-steps, .problems { grid-template-columns: 1fr; }
+      .row { grid-template-columns: 1fr; gap: 6px; }
+      .row .connector { display: none; }
+      .mtag { justify-self: start; }
+    }
+  </style>
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="index.html"><span class="brand-mark">IT</span><span><strong>IT Playground Hub</strong><small>9. клас</small></span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="main-nav">Меню</button>
+    <nav class="main-nav" id="main-nav">
+      <a href="index.html">Начало</a>
+      <a href="grade-9.html">9. клас</a>
+      <a href="chart-anatomy.html">Анатомия на графиката</a>
+      <a href="dashboard.html">Dashboard</a>
+    </nav>
+  </header>
+
+  <main class="page-shell">
+    <section class="page-hero grade-nine">
+      <p class="eyebrow">9. клас · Графики · Google Sheets</p>
+      <h1>Менюто на графиката</h1>
+      <p>Всичко, което се променя в една графика, е в <strong>Редактор на диаграми</strong>. Кликни ред от менюто, за да видиш къде е, как се използва и защо ти трябва. Всички примери са с измислени данни.</p>
+    </section>
+
+    <section class="panel section">
+      <h2>Как да отворя редактора</h2>
+      <div class="open-steps">
+        <div class="open-step"><b>Стъпка 1</b>Кликни два пъти върху графиката.</div>
+        <div class="open-step"><b>Стъпка 2</b>Вдясно се отваря панелът <span class="path">Редактор на диаграми</span>.</div>
+        <div class="open-step"><b>Стъпка 3</b>Горе има два раздела: <span class="path">Настройване</span> (какви данни и какъв вид) и <span class="path">Персонализиране</span> (как изглежда).</div>
+      </div>
+    </section>
+
+    <section class="lab">
+      <div class="panel">
+        <div class="editor-head">
+          <h2>Редактор на диаграми</h2>
+          <span class="counter" id="counter"></span>
+        </div>
+        <div class="tabs" role="tablist" id="tabs">
+          <button class="tab" type="button" role="tab" data-tab="setup">Настройване</button>
+          <button class="tab" type="button" role="tab" data-tab="custom">Персонализиране</button>
+        </div>
+        <div class="rows" id="rows"></div>
+      </div>
+
+      <aside class="panel explain" id="explain" aria-live="polite">
+        <h2 id="exTitle">Избери ред</h2>
+        <p class="label">Къде е</p>
+        <p class="where" id="exWhere">Кликни ред от менюто вляво.</p>
+        <p class="label">Как се използва</p>
+        <ol id="exHow"><li>–</li></ol>
+        <p class="label">Защо ми трябва</p>
+        <p class="why" id="exWhy">–</p>
+        <p class="label">Внимавай</p>
+        <p class="trap" id="exTrap">–</p>
+      </aside>
+    </section>
+
+    <section class="panel section">
+      <h2>Кое меню за кой проблем?</h2>
+      <p>Гледаш графика и нещо не е ясно? Намери проблема и натисни картата – ще те заведе до менюто, което го поправя.</p>
+      <div class="problems" id="problems"></div>
+    </section>
+
+    <section class="panel section" id="minimum">
+      <h2>Рецепта: линия за минимум</h2>
+      <p>Линията за минимум е граница, с която сравняваме всички колони – например 50 точки за успешен тест. В Google Sheets няма бутон „начертай линия“. Правим я като втора поредица от данни, която показваме като линия.</p>
+      <ol class="recipe">
+        <li><div>В празната колона до данните, на <b>ред 1</b>, напиши заглавие <b>Минимум</b>.</div></li>
+        <li><div>На ред 2 в същата колона напиши <b>50</b>. Хвани синьото квадратче в долния десен ъгъл на клетката и го дръпни надолу до последния ред с данни. На всеки ред трябва да има 50.</div></li>
+        <li><div>Кликни два пъти върху графиката → <span class="path">Настройване</span> → <span class="path">Диапазон от данни</span>. Разшири диапазона, така че да включва и новата колона (например от <kbd>A1:B9</kbd> на <kbd>A1:C9</kbd>).<span class="wrong">Сега до всяка колона има втора, еднаква колона с 50. Това още не е линия – продължи.</span></div></li>
+        <li><div>В <span class="path">Тип диаграма</span> слез до раздела <span class="path">Комбинация</span> и избери <b>първата</b> графика. Колоните с 50 стават хоризонтална линия.</div></li>
+        <li><div><span class="path">Персонализиране</span> → <span class="path">Поредица</span> → в падащото меню избери <b>Минимум</b> и ѝ дай цвят, който се различава от колоните.</div></li>
+        <li><div><span class="path">Персонализиране</span> → <span class="path">Легенда</span> → <span class="path">Позиция: Отдолу</span>. Без легенда никой не знае какво значи линията.</div></li>
+      </ol>
+      <p class="done">Провери: виждаш ли веднага кои колони са под линията? Ако да – линията работи.</p>
+    </section>
+
+    <section class="remember">
+      <h2>Запомни</h2>
+      <p>Настройване = какви данни и какъв вид графика. Персонализиране = как изглежда.</p>
+      <p>Всяка промяна трябва да помага на читателя, а не просто да украсява.</p>
+      <p>Преди да кажеш „готово“, покажи графиката на някого: разбира ли я от първия поглед?</p>
+    </section>
+  </main>
+
+  <script src="script.js"></script>
+  <script>
+    const ITEMS = {
+      type: {
+        tab: 'setup', what: 'Вид', tag: 'Тип диаграма',
+        mock: '<span class="m-icons"><span class="on"><b style="height:10px"></b><b style="height:16px"></b><b style="height:7px"></b></span><span><b style="height:4px;width:18px;background:#0f9f9a"></b></span><span><b style="height:14px;width:14px;border-radius:50%;background:#f2a31b"></b></span></span><span class="m-small">колони · линия · кръг …</span>',
+        where: 'Настройване → Тип диаграма',
+        how: ['Отвори падащото меню Тип диаграма.', 'Разгледай разделите – всеки вид е с малка картинка.', 'Избери вида и веднага виж как се променя графиката.'],
+        why: 'Видът зависи от въпроса: сравнявам групи → колони; промяна във времето → линия; части от едно цяло → кръг. Разделът Комбинация смесва колони и линия – така се прави линия за минимум.',
+        trap: 'Кръгова графика става само ако всички части заедно са 100%. Иначе лъже.'
+      },
+      range: {
+        tab: 'setup', what: 'Данни', tag: 'Диапазон от данни',
+        mock: '<span class="m-input">A1:B9</span><span class="m-small">⊞ избери диапазон</span>',
+        where: 'Настройване → Диапазон от данни',
+        how: ['Кликни в полето с диапазона.', 'Маркирай с мишката клетките в таблицата – заедно с реда със заглавията.', 'Натисни OK.'],
+        why: 'Казва на графиката кои клетки да рисува. Ако добавиш нов ред или нова колона в таблицата, оттук ги включваш и в графиката.',
+        trap: 'Ако не маркираш ред 1 със заглавията, графиката не знае как се казват данните и легендата става „Поредица 1“.'
+      },
+      series: {
+        tab: 'setup', what: 'Още данни', tag: 'Добавяне на Поредица',
+        mock: '<span class="m-btn">+ Добавяне на Поредица</span>',
+        where: 'Настройване → Поредица → Добавяне на Поредица',
+        how: ['Натисни Добавяне на Поредица.', 'Маркирай новата колона в таблицата, заедно със заглавието ѝ.', 'Натисни OK – в графиката се появява втори цвят.'],
+        why: 'Поредица е една колона с числа. С две поредици сравняваш две неща на една графика – например точки и минимум.',
+        trap: 'Всяка нова поредица иска легенда, иначе не се знае кой цвят какво е.'
+      },
+      style: {
+        tab: 'custom', what: 'Фон и шрифт', tag: 'Стил на диаграмата',
+        mock: '<span class="m-sw" style="background:#fff"></span><span class="m-select">Arial</span><span class="m-sw" style="background:#cfd6e2"></span>',
+        where: 'Персонализиране → Стил на диаграмата',
+        how: ['Отвори раздела Стил на диаграмата.', 'Избери цвят на фона, шрифт и цвят на рамката.'],
+        why: 'Еднакъв шрифт и спокоен фон правят графиката по-лесна за четене, особено в презентация.',
+        trap: 'Тъмен фон с тъмни колони = нищо не се вижда. Провери контраста.'
+      },
+      titles: {
+        tab: 'custom', what: 'Надписи', tag: 'Заглавия на диаграмата и осите',
+        mock: '<span class="m-select">Заглавие на диаграмата</span><span class="m-input">Точки по групи</span>',
+        where: 'Персонализиране → Заглавия на диаграмата и осите',
+        how: ['От падащото меню избери кой надпис пишеш: Заглавие на диаграмата, Подзаглавие, Заглавие на хоризонталната ос или Заглавие на вертикалната ос.', 'Напиши текста в полето Текст на заглавието.', 'Повтори за всеки надпис, който липсва.'],
+        why: 'Заглавието казва за какво е графиката. Имената на осите казват какво мерим и в какви единици. Без тях числото 50 може да е точки, проценти или секунди.',
+        trap: 'Едно меню, четири надписа. Ако си написал само заглавието, осите още са без имена – върни се и смени избора в падащото меню.'
+      },
+      color: {
+        tab: 'custom', what: 'Цвят и числа', tag: 'Поредица',
+        mock: '<span class="m-sw" style="background:#1664d9"></span><span class="m-check"><i></i>Етикети за данни</span>',
+        where: 'Персонализиране → Поредица',
+        how: ['Отвори раздела Поредица. Горе в падащото меню избери коя поредица променяш.', 'Смени цвета на колоните.', 'Отметни Етикети за данни, за да се изпише точното число върху всяка колона.'],
+        why: 'Един цвят за всички колони казва „всички са от един вид“. Етикетите показват точните числа – не гадаеш по скалата, особено когато стойностите са близки.',
+        trap: 'Шарените колони изглеждат весело, но читателят мисли, че всеки цвят значи нещо.'
+      },
+      point: {
+        tab: 'custom', what: 'Една колона', tag: 'Форматиране на точката за данни',
+        mock: '<span class="m-btn">Добавяне</span><span class="m-small">Група 3</span><span class="m-sw" style="background:#d83f6a"></span><span class="m-btn">Изтриване</span>',
+        where: 'Персонализиране → Поредица → Форматиране на точката за данни',
+        how: ['В раздела Поредица слез до Форматиране на точката за данни.', 'Натисни Добавяне и избери една колона.', 'Дай ѝ друг цвят. За да я върнеш като другите – натисни Изтриване до нея.'],
+        why: 'Така подчертаваш една колона, за която искаш да говориш – например победителя или групата, която трябва да се постарае.',
+        trap: 'Ако някоя колона е в друг цвят без причина, тук ще я намериш и ще я върнеш с Изтриване.'
+      },
+      legend: {
+        tab: 'custom', what: 'Обяснение на цветовете', tag: 'Легенда',
+        mock: '<span class="m-select">Позиция: Отдолу</span>',
+        where: 'Персонализиране → Легенда → Позиция',
+        how: ['Отвори раздела Легенда.', 'В Позиция избери къде да е: отгоре, отдолу, отдясно… или Няма.'],
+        why: 'Легендата казва какво значи всеки цвят и всяка линия. Трябва ти, щом на графиката има повече от една поредица.',
+        trap: 'При една поредица легендата само заема място – там може да е Няма. При две – задължително я покажи.'
+      },
+      hAxis: {
+        tab: 'custom', what: 'Имената долу', tag: 'Хоризонтална ос',
+        mock: '<span class="m-select">14</span><span class="m-sw" style="background:#344054"></span><span class="m-small">Група 1 · Група 2 …</span>',
+        where: 'Персонализиране → Хоризонтална ос',
+        how: ['Отвори раздела Хоризонтална ос.', 'Смени размера и цвета на надписите, ако не се четат.'],
+        why: 'Под колоните е написано какво сравняваме. Ако надписите са дребни или се застъпват, графиката не се чете.',
+        trap: 'Името на цялата ос (например „Групи“) не е тук, а в Заглавия на диаграмата и осите.'
+      },
+      vAxis: {
+        tab: 'custom', what: 'Скала', tag: 'Вертикална ос',
+        mock: '<span class="m-input">Мин. 0</span><span class="m-input">Макс. 100</span>',
+        where: 'Персонализиране → Вертикална ос → Мин. и Макс.',
+        how: ['Отвори раздела Вертикална ос.', 'В Мин. напиши от колко да започва скалата, а в Макс. – докъде да стига.'],
+        why: 'Скалата решава колко високи изглеждат колоните. Когато сравняваш колко е всяка стойност, честната скала започва от 0.',
+        trap: 'Скала, която започва от 40 вместо от 0, прави малки разлики да изглеждат огромни. Провери Мин.'
+      },
+      grid: {
+        tab: 'custom', what: 'Мрежа', tag: 'Линии на решетката и деления',
+        mock: '<span class="m-sw" style="background:#e4e7ec"></span><span class="m-small">≡ светлосиви линии</span>',
+        where: 'Персонализиране → Линии на решетката и деления',
+        how: ['Отвори раздела Линии на решетката и деления.', 'Избери колко линии да има и какъв цвят да са.'],
+        why: 'Тънките линии зад колоните помагат на окото да стигне от върха на колоната до числото на скалата.',
+        trap: 'Мрежата е помощник. Ако е по-ярка от колоните, пречи – направи я светла.'
+      }
+    };
+
+    const PROBLEMS = [
+      ['Не знам за какво е графиката.', 'titles'],
+      ['Не знам в какво се мери – точки, проценти, секунди?', 'titles'],
+      ['Разликите изглеждат огромни, а числата са близки.', 'vAxis'],
+      ['Не виждам точните числа.', 'color'],
+      ['Колоните са в различни цветове без причина.', 'point'],
+      ['Има два цвята, а не знам кой какво е.', 'legend'],
+      ['Искам да подчертая една колона.', 'point'],
+      ['Видът графика не пасва на въпроса.', 'type'],
+      ['Трябва ми граница – кой е над и кой под?', '#minimum']
+    ];
+
+    let tab = 'setup', active = null;
+    const rowsEl = document.getElementById('rows');
+
+    function renderRows() {
+      rowsEl.innerHTML = '';
+      const keys = Object.keys(ITEMS).filter(k => ITEMS[k].tab === tab);
+      keys.forEach(k => {
+        const it = ITEMS[k];
+        const b = document.createElement('button');
+        b.type = 'button'; b.className = 'row' + (active === k ? ' active' : ''); b.dataset.key = k;
+        b.innerHTML = '<span class="what">' + it.what + '</span><span class="mock">' + it.mock + '</span><span class="connector"></span><span class="mtag">' + it.tag + '</span>';
+        b.addEventListener('click', () => select(k));
+        rowsEl.appendChild(b);
+      });
+      document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.tab === tab ? 'true' : 'false'));
+      const total = Object.keys(ITEMS).length;
+      document.getElementById('counter').textContent = (tab === 'setup' ? keys.length + ' в Настройване' : keys.length + ' в Персонализиране') + ' · ' + total + ' общо';
+    }
+
+    function select(k, scroll) {
+      const it = ITEMS[k];
+      active = k;
+      if (it.tab !== tab) tab = it.tab;
+      renderRows();
+      document.getElementById('exTitle').textContent = it.tag;
+      document.getElementById('exWhere').textContent = 'Редактор на диаграми → ' + it.where;
+      document.getElementById('exHow').innerHTML = it.how.map(s => '<li>' + s + '</li>').join('');
+      document.getElementById('exWhy').textContent = it.why;
+      document.getElementById('exTrap').textContent = it.trap;
+      if (scroll || window.innerWidth <= 980) document.getElementById(scroll ? 'rows' : 'explain').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => { tab = t.dataset.tab; renderRows(); }));
+
+    const probEl = document.getElementById('problems');
+    PROBLEMS.forEach(([text, target]) => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'problem';
+      const label = target.startsWith('#') ? 'Рецепта: линия за минимум' : ITEMS[target].tag;
+      b.innerHTML = '<b>' + text + '</b><span>→ ' + label + '</span>';
+      b.addEventListener('click', () => {
+        if (target.startsWith('#')) document.querySelector(target).scrollIntoView({ behavior: 'smooth', block: 'start' });
+        else select(target, true);
+      });
+      probEl.appendChild(b);
+    });
+
+    renderRows();
+  </script>
+</body>
+</html>
